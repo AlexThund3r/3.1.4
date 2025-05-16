@@ -74,13 +74,20 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUser(User user) {
         User existingUser = userRepository.findById(user.getId()).orElse(null);
+
         if (existingUser != null) {
-            if (!user.getPassword().equals(existingUser.getPassword())) {
+            // Если поле пароля пустое — оставить старый пароль
+            if (user.getPassword() == null || user.getPassword().isEmpty()) {
+                user.setPassword(existingUser.getPassword());
+            } else {
                 user.setPassword(passwordEncoder.encode(user.getPassword()));
             }
+
+
             userRepository.save(user);
         }
     }
+
 
     @Override
     public void deleteUser(Long id) {

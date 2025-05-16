@@ -24,7 +24,7 @@ public class User implements UserDetails {
     @Column(name = "email")
     private String email;
 
-    @Column(name = "age")
+    @Column(name = "age", nullable = true)
     private Integer age;
 
     @Column(name = "password", nullable = false)
@@ -96,7 +96,7 @@ public class User implements UserDetails {
         this.email = email;
     }
 
-    public int getAge() {
+    public Integer getAge() {
         return age;
     }
 
