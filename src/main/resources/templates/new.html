@@ -1,10 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
     <title>Создать пользователя</title>
 </head>
 <body>
+
 <h2>Создание нового пользователя</h2>
 
 <form th:action="@{/admin}" th:object="${user}" method="post">
@@ -31,6 +33,15 @@
     <button type="submit">Создать</button>
 </form>
 
+<br/>
 <a href="/admin">Назад</a>
+
+<!-- Кнопка выхода внизу -->
+<div style="margin-top: 40px;">
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Выйти</button>
+    </form>
+</div>
+
 </body>
 </html>

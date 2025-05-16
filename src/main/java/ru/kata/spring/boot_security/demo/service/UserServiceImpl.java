@@ -11,8 +11,8 @@ import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
-import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -32,19 +32,28 @@ public class UserServiceImpl implements UserService {
     public void init() {
         if (userRepository.findByUsername("admin") == null) {
             Role adminRole = roleRepository.findByName("ROLE_ADMIN");
+            Role userRole = roleRepository.findByName("ROLE_USER");
+
             if (adminRole == null) {
                 adminRole = new Role();
                 adminRole.setName("ROLE_ADMIN");
                 roleRepository.save(adminRole);
             }
 
+            if (userRole == null) {
+                userRole = new Role();
+                userRole.setName("ROLE_USER");
+                roleRepository.save(userRole);
+            }
+
             User admin = new User();
             admin.setUsername("admin");
             admin.setPassword(passwordEncoder.encode("admin"));
-            admin.setRoles(Collections.singleton(adminRole));
+            admin.setRoles(Set.of(adminRole, userRole)); // <--- Две роли
             userRepository.save(admin);
         }
     }
+
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
@@ -74,16 +83,12 @@ public class UserServiceImpl implements UserService {
     @Override
     public void updateUser(User user) {
         User existingUser = userRepository.findById(user.getId()).orElse(null);
-
         if (existingUser != null) {
-            // Если поле пароля пустое — оставить старый пароль
             if (user.getPassword() == null || user.getPassword().isEmpty()) {
                 user.setPassword(existingUser.getPassword());
             } else {
                 user.setPassword(passwordEncoder.encode(user.getPassword()));
             }
-
-
             userRepository.save(user);
         }
     }

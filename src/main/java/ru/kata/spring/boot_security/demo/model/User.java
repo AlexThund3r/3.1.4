@@ -61,9 +61,6 @@ public class User implements UserDetails {
         return username != null ? username.hashCode() : 0;
     }
 
-
-    // === Геттеры и сеттеры ===
-
     public Long getId() {
         return id;
     }
@@ -111,8 +108,6 @@ public class User implements UserDetails {
     public void setRoles(Set<Role> roles) {
         this.roles = roles;
     }
-
-    // === Реализация методов UserDetails ===
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

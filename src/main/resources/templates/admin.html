@@ -1,9 +1,12 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
+    <meta charset="UTF-8">
     <title>Admin Panel</title>
 </head>
 <body>
+
 <h2>Список пользователей</h2>
 
 <table border="1">
@@ -27,8 +30,7 @@
         <td th:text="${user.age} ?: '–'"></td>
         <td th:text="${user.roles}"></td>
         <td>
-            <a th:href="@{/admin/edit/{id}(id=${user.id})}">Редактировать</a>
-            |
+            <a th:href="@{/admin/edit/{id}(id=${user.id})}">Редактировать</a> |
             <a th:href="@{/admin/delete/{id}(id=${user.id})}">Удалить</a>
         </td>
     </tr>
@@ -37,6 +39,13 @@
 
 <br/>
 <a href="/admin/new">Добавить нового пользователя</a>
+
+<!-- Кнопка выхода внизу -->
+<div style="margin-top: 40px;">
+    <form th:action="@{/logout}" method="post">
+        <button type="submit">Выйти</button>
+    </form>
+</div>
 
 </body>
 </html>
