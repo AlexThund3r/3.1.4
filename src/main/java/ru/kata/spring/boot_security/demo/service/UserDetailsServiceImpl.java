@@ -1,86 +1,74 @@
 package ru.kata.spring.boot_security.demo.service;
 
-import javax.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
+import org.springframework.transaction.annotation.Transactional;
+
 
 import java.util.List;
-import java.util.Set;
 
 @Service
-public class UserServiceImpl implements UserService {
+public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserDetailsServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    @PostConstruct
-    public void init() {
-        if (userRepository.findByUsername("admin") == null) {
-            Role adminRole = roleRepository.findByName("ROLE_ADMIN");
-            Role userRole = roleRepository.findByName("ROLE_USER");
-
-            if (adminRole == null) {
-                adminRole = new Role();
-                adminRole.setName("ROLE_ADMIN");
-                roleRepository.save(adminRole);
-            }
-
-            if (userRole == null) {
-                userRole = new Role();
-                userRole.setName("ROLE_USER");
-                roleRepository.save(userRole);
-            }
-
-            User admin = new User();
-            admin.setUsername("admin");
-            admin.setPassword(passwordEncoder.encode("admin"));
-            admin.setRoles(Set.of(adminRole, userRole)); // <--- Две роли
-            userRepository.save(admin);
-        }
-    }
-
-
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = userRepository.findByUsername(username);
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
+        User user = userRepository.findByEmail(email);
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
+        user.getRoles().size();
         return user;
     }
 
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
+
 
     @Override
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        users.forEach(user -> user.getRoles().size()); // инициализация ролей у всех
+        return users;
+    }
+
+
+    @Override
+    @Transactional
     public void saveUser(User user) {
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         userRepository.save(user);
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
+        User user = userRepository.findById(id).orElse(null);
+        if (user != null) {
+            user.getRoles().size(); // инициализация ролей в транзакции
+        }
+        return user;
     }
 
+
     @Override
+    @Transactional
     public void updateUser(User user) {
         User existingUser = userRepository.findById(user.getId()).orElse(null);
         if (existingUser != null) {
@@ -93,14 +81,19 @@ public class UserServiceImpl implements UserService {
         }
     }
 
-
     @Override
+    @Transactional
     public void deleteUser(Long id) {
         userRepository.deleteById(id);
     }
 
     @Override
-    public User findByUsername(String username) {
-        return userRepository.findByUsername(username);
+    @Transactional(readOnly = true)
+    public User findByEmail(String email) {
+        User user = userRepository.findByEmail(email);
+        if (user != null) {
+            user.getRoles().size(); // Принудительная инициализация ролей (если lazy)
+        }
+        return user;
     }
 }

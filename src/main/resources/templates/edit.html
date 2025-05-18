@@ -13,13 +13,13 @@
     <input type="hidden" th:field="*{id}" />
 
     <label>Имя:</label>
-    <input type="text" th:field="*{username}" required /><br/>
+    <input type="text" th:field="*{firstname}" required /><br/>
 
     <label>Фамилия:</label>
     <input type="text" th:field="*{lastName}" /><br/>
 
     <label>Email:</label>
-    <input type="email" th:field="*{email}" /><br/>
+    <input type="email" th:field="*{email}" required /><br/>
 
     <label>Возраст:</label>
     <input type="number" th:field="*{age}" min="0" /><br/>
@@ -28,13 +28,15 @@
     <input type="password" th:field="*{password}" /><br/>
 
     <label>Роли:</label>
-    <select th:field="*{roles}" multiple size="2">
-        <option th:each="role : ${roles}" th:value="${role.id}" th:text="${role.name}"></option>
+    <select name="rolesSelected" multiple size="2">
+        <option th:each="role : ${roles}"
+                th:value="${role.id}"
+                th:text="${role.name}"
+                th:selected="${user.roles.contains(role)}"></option>
     </select><br/>
 
     <button type="submit">Обновить</button>
 </form>
-
 
 <br/>
 <a href="/admin">Назад</a>
