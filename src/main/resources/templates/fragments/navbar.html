@@ -1,0 +1,7 @@
+<nav class="navbar navbar-dark bg-dark px-3">
+    <div class="container-fluid d-flex justify-content-between">
+        <div class="text-white">
+            <span th:text="${#authentication.principal.email}">admin@mail.ru</span> with roles:
+            <span th:each="role : ${#authentication.principal.roles}" th:text="${role.name}" th:append=" ' '"></span>
+        </div>
+        <form th:action="@{/logout}" method="post" class="d-flex">

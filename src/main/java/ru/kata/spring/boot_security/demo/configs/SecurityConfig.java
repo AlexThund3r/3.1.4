@@ -34,14 +34,14 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .antMatchers("/", "/index").permitAll()
+                .antMatchers("/login", "/auth/**", "/css/**", "/js/**", "/images/**").permitAll() // разрешаем доступ к логину и ресурсам
                 .antMatchers("/admin/**").hasRole("ADMIN")
                 .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
                 .anyRequest().authenticated()
                 .and()
                 .formLogin()
                 .loginPage("/login")
-                .usernameParameter("email")  // Совпадает с формой
+                .usernameParameter("email")
                 .passwordParameter("password")
                 .successHandler(successUserHandler)
                 .permitAll()
@@ -49,4 +49,5 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
                 .logout()
                 .permitAll();
     }
+
 }

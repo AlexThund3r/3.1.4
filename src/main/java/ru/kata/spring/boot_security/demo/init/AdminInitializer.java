@@ -10,8 +10,6 @@ import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import javax.transaction.Transactional;
-import java.util.HashSet;
-import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -41,7 +39,7 @@ public class AdminInitializer implements CommandLineRunner {
             }
 
             User admin = new User();
-            admin.setFirstname("Admin");
+            admin.setFirstName("Admin");
             admin.setLastName("Admin");
             admin.setEmail("admin@mail.ru");
             admin.setAge(30);

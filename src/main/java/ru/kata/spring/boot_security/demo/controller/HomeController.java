@@ -11,7 +11,10 @@ public class HomeController {
 
     @GetMapping("/")
     public String homePage(@AuthenticationPrincipal User user, Model model) {
-        model.addAttribute("user", user);
-        return "index";
+        if (user != null) {
+            model.addAttribute("user", user);
+            return "users/user";
+        }
+        return "redirect:/login";
     }
 }

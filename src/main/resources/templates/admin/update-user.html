@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8" />
+    <title>Admin Panel - Update User</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet"/>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark px-3">
+    <div class="container-fluid d-flex justify-content-between">
+        <div class="text-white">
+            <span th:text="${#authentication.principal.email}">admin@mail.ru</span> with roles:
+            <span th:each="role : ${#authentication.principal.roles}" th:text="${role.name}" th:append=" ' '"></span>
+        </div>
+        <form th:action="@{/logout}" method="post" class="d-flex">
+            <button class="btn btn-outline-light btn-sm" type="submit">Logout</button>
+        </form>
+    </div>
+</nav>
+
+<div class="d-flex">
+    <!-- Sidebar -->
+    <div class="d-flex flex-column p-3 bg-light" style="width: 250px; height: 100vh;">
+        <ul class="nav nav-pills flex-column mb-auto">
+            <li class="nav-item">
+                <a th:href="@{/admin}" class="nav-link"
+                   th:classappend="${#httpServletRequest.requestURI.startsWith('/admin') ? 'active' : ''}">
+                    Admin
+                </a>
+            </li>
+            <li>
+                <a th:href="@{/user}" class="nav-link"
+                   th:classappend="${#httpServletRequest.requestURI.startsWith('/user') ? 'active' : ''}">
+                    User
+                </a>
+            </li>
+        </ul>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container mt-4">
+        <h1>Update User</h1>
+
+        <form th:action="@{/admin/save}" th:object="${user}" method="post">
+
+            <input type="hidden" th:field="*{id}"/>
+
+            <div class="mb-3">
+                <label for="firstName" class="form-label">First Name</label>
+                <input type="text" th:field="*{firstName}" class="form-control" id="firstName" required/>
+            </div>
+
+            <div class="mb-3">
+                <label for="lastName" class="form-label">Last Name</label>
+                <input type="text" th:field="*{lastName}" class="form-control" id="lastName" required/>
+            </div>
+
+            <div class="mb-3">
+                <label for="age" class="form-label">Age</label>
+                <input type="number" th:field="*{age}" class="form-control" id="age" min="0" required/>
+            </div>
+
+            <div class="mb-3">
+                <label for="email" class="form-label">Email</label>
+                <input type="email" th:field="*{email}" class="form-control" id="email" required/>
+            </div>
+
+            <div class="mb-3">
+                <label for="roles" class="form-label">Roles</label>
+                <select th:field="*{roles}" name="roles" class="form-select" id="roles" multiple size="3">
+                    <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+                </select>
+            </div>
+
+            <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input type="password" th:field="*{password}" class="form-control" id="password" placeholder="Leave blank if no change"/>
+            </div>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+            <a th:href="@{/admin/all-users}" class="btn btn-secondary">Cancel</a>
+
+        </form>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
