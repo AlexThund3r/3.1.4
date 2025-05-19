@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -92,8 +93,9 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
-            user.getRoles().size(); // Принудительная инициализация ролей (если lazy)
+            user.getRoles().size();
         }
         return user;
     }
+
 }

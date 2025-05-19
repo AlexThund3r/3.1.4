@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 @Entity
 @Table(name = "users")
@@ -39,6 +40,10 @@ public class User implements UserDetails {
 
     public User() {}
 
+    public boolean isAdmin() {
+        return roles.stream().anyMatch(role -> "ADMIN".equals(role.getName()));
+    }
+
     public User(String firstName, String lastName, String email, int age, String password) {
         this.firstName = firstName;
         this.lastName = lastName;
@@ -46,8 +51,6 @@ public class User implements UserDetails {
         this.age = age;
         this.password = password;
     }
-
-    // Spring Security methods
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
@@ -59,7 +62,6 @@ public class User implements UserDetails {
         return password;
     }
 
-    // Spring Security требует реализацию getUsername()
     @Override
     public String getUsername() {
         return email;
@@ -123,7 +125,7 @@ public class User implements UserDetails {
         return age;
     }
 
-    public void setAge(int age) {
+    public void setAge(Integer age) {
         this.age = age;
     }
 
@@ -139,8 +141,6 @@ public class User implements UserDetails {
         this.roles = roles;
     }
 
-    // equals и hashCode по email (логин-поле)
-
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -152,5 +152,11 @@ public class User implements UserDetails {
     @Override
     public int hashCode() {
         return Objects.hash(email);
+    }
+
+    public String rolesToString() {
+        return roles.stream()
+                .map(Role::getName)
+                .collect(Collectors.joining(" "));
     }
 }
