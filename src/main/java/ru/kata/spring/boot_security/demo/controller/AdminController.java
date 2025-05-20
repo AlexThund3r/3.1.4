@@ -57,20 +57,34 @@ public class AdminController {
             return "redirect:/admin";
         }
         model.addAttribute("user", user);
-        model.addAttribute("roles", roleService.getAllRoles());
+        model.addAttribute("allRoles", roleService.getAllRoles());
         return "admin/update-user";
     }
 
     @PostMapping("/update")
     public String updateUser(@ModelAttribute("user") User user,
                              @RequestParam(value = "rolesSelected", required = false) List<Long> rolesSelected) {
+        // Получаем текущего пользователя из БД
+        User existingUser = userService.getUserById(user.getId());
+
+        // Обновляем только те поля, которые были изменены
+        existingUser.setFirstName(user.getFirstName());
+        existingUser.setLastName(user.getLastName());
+        existingUser.setAge(user.getAge());
+        existingUser.setEmail(user.getEmail());
+
+        // Обновляем пароль только если он был указан
+        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+            existingUser.setPassword(user.getPassword());
+        }
+
+        // Обновляем роли только если они были указаны
         if (rolesSelected != null && !rolesSelected.isEmpty()) {
             Set<Role> roles = new HashSet<>(roleService.getRolesByIds(rolesSelected));
-            user.setRoles(roles);
-        } else {
-            user.setRoles(new HashSet<>());
+            existingUser.setRoles(roles);
         }
-        userService.updateUser(user);
+
+        userService.updateUser(existingUser);
         return "redirect:/admin";
     }
 

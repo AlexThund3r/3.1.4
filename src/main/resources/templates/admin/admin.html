@@ -122,7 +122,11 @@
                                         <div class="mb-3">
                                             <label class="fw-bold text-center w-100">Role</label>
                                             <select multiple class="form-select w-50 mx-auto" name="rolesSelected" style="height: 60px;">
-                                                <option th:each="role : ${allRoles}" th:value="${role.id}" th:text="${role.name}"></option>
+                                                <option th:each="role : ${allRoles}"
+                                                        th:value="${role.id}"
+                                                        th:text="${role.name}"
+                                                        th:selected="${#lists.contains(user.roles, role)}">
+                                                </option>
                                             </select>
                                         </div>
                                     </div>

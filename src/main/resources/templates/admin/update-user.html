@@ -42,12 +42,15 @@
             </div>
             <div class="mb-3">
                 <label for="roles" class="form-label">Roles</label>
-                <select th:field="*{roles}" name="roles" class="form-select" id="roles" multiple size="3">
-                    <option th:each="role : ${allRoles}" th:value="${role.id}"
+                <select th:field="*{roles}" name="rolesSelected" class="form-select" id="roles" multiple size="3">
+                    <option th:each="role : ${allRoles}"
+                            th:value="${role.id}"
                             th:text="${role.name}"
-                            th:selected="*{roles.contains(role)}"></option>
+                            th:selected="${user.roles.contains(role)}">
+                    </option>
                 </select>
             </div>
+
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
                 <input type="password" th:field="*{password}" class="form-control" id="password" placeholder="Leave blank if no change"/>

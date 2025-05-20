@@ -1,31 +1,48 @@
 document.addEventListener('DOMContentLoaded', function () {
-    // Обработчик для модального окна редактирования
-    document.querySelectorAll('.edit-btn').forEach(button => {
-        button.addEventListener('click', function (event) {
-            const button = event.target;
-            const tableRow = button.closest('tr');
+    document.addEventListener('DOMContentLoaded', function() {
+        // Обработчик для модального окна редактирования
+        document.querySelectorAll('.edit-btn').forEach(button => {
+            button.addEventListener('click', function(event) {
+                const button = event.target;
+                const tableRow = button.closest('tr');
+                const modalId = button.getAttribute('data-bs-target');
+                const modal = document.querySelector(modalId);
 
-            // Заполнение формы редактирования данными из строки таблицы
-            document.getElementById('firstName').value = tableRow.querySelector('td:nth-child(2)').textContent.trim();
-            document.getElementById('lastName').value = tableRow.querySelector('td:nth-child(3)').textContent.trim();
-            document.getElementById('age').value = tableRow.querySelector('td:nth-child(4)').textContent.trim();
-            document.getElementById('email').value = tableRow.querySelector('td:nth-child(5)').textContent.trim();
-            document.getElementById('password').value = ''; // Оставляем пустым, если не меняем пароль
+                // Получаем данные из строки таблицы
+                const userId = tableRow.querySelector('td:nth-child(1)').textContent.trim();
+                const firstName = tableRow.querySelector('td:nth-child(2)').textContent.trim();
+                const lastName = tableRow.querySelector('td:nth-child(3)').textContent.trim();
+                const age = tableRow.querySelector('td:nth-child(4)').textContent.trim();
+                const email = tableRow.querySelector('td:nth-child(5)').textContent.trim();
+                const rolesString = tableRow.querySelector('td:nth-child(6)').textContent.trim();
 
-            // Заполнение ролей для редактируемого пользователя
-            const rolesString = tableRow.querySelector('td:nth-child(6)').textContent.trim();
-            const roles = rolesString.split(',').map(role => role.trim().toUpperCase()); // Преобразуем роли в массив
-            const rolesSelect = document.getElementById('roles');
-            for (let option of rolesSelect.options) {
-                option.selected = roles.includes(option.value); // Выбираем соответствующие роли
-            }
+                // Заполняем форму в модальном окне
+                const form = modal.querySelector('form');
+                form.querySelector('input[name="id"]').value = userId;
+                form.querySelector('input[name="firstName"]').value = firstName;
+                form.querySelector('input[name="lastName"]').value = lastName;
+                form.querySelector('input[name="age"]').value = age;
+                form.querySelector('input[name="email"]').value = email;
+                form.querySelector('input[name="password"]').value = '';
 
-            // Установка ID пользователя в скрытое поле для отправки формы
-            document.getElementById('userId').value = tableRow.querySelector('td:nth-child(1)').textContent.trim();
+                // Обрабатываем роли
+                const rolesSelect = form.querySelector('select[name="rolesSelected"]');
+                const currentRoles = rolesString.split(',').map(r => r.trim());
+
+                // Сбрасываем все выделения
+                Array.from(rolesSelect.options).forEach(option => {
+                    option.selected = false;
+                });
+
+                // Устанавливаем текущие роли
+                Array.from(rolesSelect.options).forEach(option => {
+                    if (currentRoles.includes(option.text.trim())) {
+                        option.selected = true;
+                    }
+                });
+            });
         });
-    });
-
-    // Обработчик для модального окна удаления
+    // Остальной код остается без изменений
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', function (event) {
             const button = event.target;
@@ -44,4 +61,4 @@ document.addEventListener('DOMContentLoaded', function () {
             modal.show();
         });
     });
-});
+});}
