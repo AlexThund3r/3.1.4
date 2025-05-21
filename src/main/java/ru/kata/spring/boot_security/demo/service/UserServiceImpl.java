@@ -1,16 +1,13 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.repository.RoleRepository;
-import ru.kata.spring.boot_security.demo.repository.UserRepository;
 import org.springframework.transaction.annotation.Transactional;
-
+import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.repository.UserRepository;
 
 import java.util.List;
 
@@ -18,13 +15,11 @@ import java.util.List;
 public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
-    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder) {
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -35,20 +30,17 @@ public class UserServiceImpl implements UserService {
         if (user == null) {
             throw new UsernameNotFoundException("User not found");
         }
-        user.getRoles().size();
+        user.getRoles().size(); // Инициализация ролей
         return user;
     }
-
-
 
     @Override
     @Transactional(readOnly = true)
     public List<User> getAllUsers() {
         List<User> users = userRepository.findAll();
-        users.forEach(user -> user.getRoles().size()); // инициализация ролей у всех
+        users.forEach(user -> user.getRoles().size()); // Инициализация ролей
         return users;
     }
-
 
     @Override
     @Transactional
@@ -62,11 +54,10 @@ public class UserServiceImpl implements UserService {
     public User getUserById(Long id) {
         User user = userRepository.findById(id).orElse(null);
         if (user != null) {
-            user.getRoles().size(); // инициализация ролей в транзакции
+            user.getRoles().size(); // Инициализация ролей
         }
         return user;
     }
-
 
     @Override
     @Transactional
@@ -93,9 +84,14 @@ public class UserServiceImpl implements UserService {
     public User findByEmail(String email) {
         User user = userRepository.findByEmail(email);
         if (user != null) {
-            user.getRoles().size();
+            user.getRoles().size(); // Инициализация ролей
         }
         return user;
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public boolean existsByEmail(String email) {
+        return userRepository.existsByEmail(email);
+    }
 }

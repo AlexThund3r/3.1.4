@@ -1,64 +1,120 @@
 document.addEventListener('DOMContentLoaded', function () {
-    document.addEventListener('DOMContentLoaded', function() {
-        // Обработчик для модального окна редактирования
-        document.querySelectorAll('.edit-btn').forEach(button => {
-            button.addEventListener('click', function(event) {
-                const button = event.target;
-                const tableRow = button.closest('tr');
-                const modalId = button.getAttribute('data-bs-target');
-                const modal = document.querySelector(modalId);
 
-                // Получаем данные из строки таблицы
-                const userId = tableRow.querySelector('td:nth-child(1)').textContent.trim();
-                const firstName = tableRow.querySelector('td:nth-child(2)').textContent.trim();
-                const lastName = tableRow.querySelector('td:nth-child(3)').textContent.trim();
-                const age = tableRow.querySelector('td:nth-child(4)').textContent.trim();
-                const email = tableRow.querySelector('td:nth-child(5)').textContent.trim();
-                const rolesString = tableRow.querySelector('td:nth-child(6)').textContent.trim();
+    // Функция для получения всех ролей
+    function fetchRoles() {
+        fetch('/api/admin/roles')  // Эндпоинт для получения списка ролей
+            .then(response => response.json())
+            .then(roles => {
+                const rolesSelect = document.querySelector('select[name="rolesSelected"]');
+                rolesSelect.innerHTML = ''; // Очищаем текущие роли
 
-                // Заполняем форму в модальном окне
-                const form = modal.querySelector('form');
-                form.querySelector('input[name="id"]').value = userId;
-                form.querySelector('input[name="firstName"]').value = firstName;
-                form.querySelector('input[name="lastName"]').value = lastName;
-                form.querySelector('input[name="age"]').value = age;
-                form.querySelector('input[name="email"]').value = email;
-                form.querySelector('input[name="password"]').value = '';
-
-                // Обрабатываем роли
-                const rolesSelect = form.querySelector('select[name="rolesSelected"]');
-                const currentRoles = rolesString.split(',').map(r => r.trim());
-
-                // Сбрасываем все выделения
-                Array.from(rolesSelect.options).forEach(option => {
-                    option.selected = false;
+                roles.forEach(role => {
+                    const option = document.createElement('option');
+                    option.value = role.id;
+                    option.textContent = role.name;
+                    rolesSelect.appendChild(option);
                 });
+            })
+            .catch(error => console.error('Ошибка получения ролей:', error));
+    }
 
-                // Устанавливаем текущие роли
-                Array.from(rolesSelect.options).forEach(option => {
-                    if (currentRoles.includes(option.text.trim())) {
-                        option.selected = true;
-                    }
-                });
-            });
+    // Загружаем роли при загрузке страницы
+    fetchRoles();
+
+    // Функция для получения всех пользователей
+    function fetchUsers() {
+        fetch('/api/users')
+            .then(response => response.json())
+            .then(users => {
+                console.log('Полученные пользователи:', users);  // Логируем полученные данные
+                updateUsersTable(users);
+            })
+            .catch(error => console.error('Ошибка получения пользователей:', error));
+    }
+
+
+    // Функция для обновления таблицы пользователей
+    function updateUsersTable(users) {
+        const tableBody = document.getElementById('usersTableBody');
+        tableBody.innerHTML = ''; // Очищаем таблицу
+
+        console.log('Обновление таблицы с пользователями:', users);  // Логируем, какие данные обрабатываются
+
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.firstName}</td>
+            <td>${user.lastName}</td>
+            <td>${user.age}</td>
+            <td>${user.email}</td>
+            <td>${user.roles.map(role => role.name).join(', ')}</td>
+            <td>
+                <button class="btn btn-info btn-sm edit-btn" data-bs-toggle="modal" data-bs-target="#editModal-${user.id}" data-id="${user.id}">Edit</button>
+            </td>
+            <td>
+                <button class="btn btn-danger btn-sm delete-btn" data-id="${user.id}">Delete</button>
+            </td>
+        `;
+            tableBody.appendChild(row);
         });
-    // Остальной код остается без изменений
+    }
+
+
+    // Функция для добавления нового пользователя
+    const addUserForm = document.getElementById('addUserForm');
+    if (addUserForm) {
+        addUserForm.addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const newUser = {
+                firstName: addUserForm.querySelector('input[name="firstName"]').value,
+                lastName: addUserForm.querySelector('input[name="lastName"]').value,
+                age: addUserForm.querySelector('input[name="age"]').value,
+                email: addUserForm.querySelector('input[name="email"]').value,
+                password: addUserForm.querySelector('input[name="password"]').value,
+                roles: Array.from(addUserForm.querySelectorAll('select[name="rolesSelected"] option:checked'))
+                    .map(option => option.value)
+            };
+
+            fetch('/api/users', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(newUser)
+            })
+                .then(response => response.json())
+                .then(user => {
+                    alert('Пользователь добавлен');
+                    fetchUsers();  // Обновляем таблицу пользователей
+                })
+                .catch(error => console.error('Ошибка добавления пользователя:', error));
+        });
+    }
+
+// Обработчик для удаления пользователя
     document.querySelectorAll('.delete-btn').forEach(button => {
         button.addEventListener('click', function (event) {
-            const button = event.target;
-            const tableRow = button.closest('tr');
-
-            // Заполнение скрытых полей формы для удаления
-            document.getElementById('delete-user-id').value = tableRow.querySelector('td:nth-child(1)').textContent.trim();
-            document.getElementById('delete-user-firstName').value = tableRow.querySelector('td:nth-child(2)').textContent.trim();
-            document.getElementById('delete-user-lastName').value = tableRow.querySelector('td:nth-child(3)').textContent.trim();
-            document.getElementById('delete-user-age').value = tableRow.querySelector('td:nth-child(4)').textContent.trim();
-            document.getElementById('delete-user-email').value = tableRow.querySelector('td:nth-child(5)').textContent.trim();
-            document.getElementById('delete-user-roles').value = tableRow.querySelector('td:nth-child(6)').textContent.trim();
-
-            // Открытие модального окна для удаления
-            const modal = new bootstrap.Modal(document.getElementById('deleteModal-' + tableRow.querySelector('td:nth-child(1)').textContent.trim()));
-            modal.show();
+            const userId = button.getAttribute('data-id');
+            if (confirm('Вы уверены, что хотите удалить этого пользователя?')) {
+                fetch(`/api/admin/users/${userId}`, {
+                    method: 'DELETE'
+                })
+                    .then(response => {
+                        if (response.ok) {
+                            alert('Пользователь удалён');
+                            fetchUsers();  // Обновляем список пользователей
+                        } else {
+                            alert('Ошибка удаления');
+                        }
+                    })
+                    .catch(error => console.error('Ошибка удаления:', error));
+            }
         });
     });
-});}
+
+
+    // Инициализация таблицы пользователей при загрузке страницы
+    fetchUsers();
+});
