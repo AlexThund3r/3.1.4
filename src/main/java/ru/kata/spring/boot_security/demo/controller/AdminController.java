@@ -6,6 +6,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
+import ru.kata.spring.boot_security.demo.service.AdminService;
 import ru.kata.spring.boot_security.demo.service.RoleService;
 import ru.kata.spring.boot_security.demo.service.UserService;
 
@@ -17,21 +18,18 @@ import java.util.Set;
 @RequestMapping("/admin")
 public class AdminController {
 
-    private final UserService userService;
+    private final AdminService adminService;
     private final RoleService roleService;
 
-    @Autowired
-    public AdminController(UserService userService, RoleService roleService) {
-        this.userService = userService;
+    public AdminController(AdminService adminService, RoleService roleService) {
+        this.adminService = adminService;
         this.roleService = roleService;
     }
 
     @GetMapping({"", "/"})
     public String showAdminPanel(Model model) {
-        List<User> users = userService.getAllUsers();
-        model.addAttribute("users", users);
-        User admin = userService.findByEmail("admin@mail.ru");
-        model.addAttribute("currentUser", admin);
+        model.addAttribute("users", adminService.getAllUsers());
+        model.addAttribute("currentUser", adminService.getCurrentUser());
         model.addAttribute("user", new User());
         model.addAttribute("allRoles", roleService.getAllRoles());
         return "admin/admin";
@@ -40,19 +38,13 @@ public class AdminController {
     @PostMapping("/new-user")
     public String createUser(@ModelAttribute("user") User user,
                              @RequestParam(value = "rolesSelected", required = false) List<Long> rolesSelected) {
-        if (rolesSelected != null && !rolesSelected.isEmpty()) {
-            Set<Role> roles = new HashSet<>(roleService.getRolesByIds(rolesSelected));
-            user.setRoles(roles);
-        } else {
-            user.setRoles(new HashSet<>());
-        }
-        userService.saveUser(user);
+        adminService.createUser(user, rolesSelected);
         return "redirect:/admin";
     }
 
     @GetMapping("/update/{id}")
     public String editUserForm(@PathVariable("id") Long id, Model model) {
-        User user = userService.getUserById(id);
+        User user = adminService.getUserById(id);
         if (user == null) {
             return "redirect:/admin";
         }
@@ -64,36 +56,13 @@ public class AdminController {
     @PostMapping("/update")
     public String updateUser(@ModelAttribute("user") User user,
                              @RequestParam(value = "rolesSelected", required = false) List<Long> rolesSelected) {
-        // Получаем текущего пользователя из БД
-        User existingUser = userService.getUserById(user.getId());
-
-        // Обновляем только те поля, которые были изменены
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setAge(user.getAge());
-        existingUser.setEmail(user.getEmail());
-
-        // Обновляем пароль только если он был указан
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(user.getPassword());
-        }
-
-        // Обновляем роли только если они были указаны
-        if (rolesSelected != null && !rolesSelected.isEmpty()) {
-            Set<Role> roles = new HashSet<>(roleService.getRolesByIds(rolesSelected));
-            existingUser.setRoles(roles);
-        }
-
-        userService.updateUser(existingUser);
+        adminService.updateUser(user, rolesSelected);
         return "redirect:/admin";
     }
 
     @PostMapping("/delete/{id}")
     public String deleteUser(@PathVariable("id") Long id) {
-        User user = userService.getUserById(id);
-        if (user != null) {
-            userService.deleteUser(id);
-        }
+        adminService.deleteUser(id);
         return "redirect:/admin";
     }
 }

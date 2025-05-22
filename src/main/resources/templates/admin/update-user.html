@@ -24,25 +24,30 @@
         <h1>Update User</h1>
         <form th:action="@{/admin/update}" th:object="${user}" method="post">
             <input type="hidden" th:field="*{id}"/>
+
             <div class="mb-3">
                 <label for="firstName" class="form-label">First Name</label>
                 <input type="text" th:field="*{firstName}" class="form-control" id="firstName" required/>
             </div>
+
             <div class="mb-3">
                 <label for="lastName" class="form-label">Last Name</label>
                 <input type="text" th:field="*{lastName}" class="form-control" id="lastName" required/>
             </div>
+
             <div class="mb-3">
                 <label for="age" class="form-label">Age</label>
                 <input type="number" th:field="*{age}" class="form-control" id="age" min="0" required/>
             </div>
+
             <div class="mb-3">
                 <label for="email" class="form-label">Email</label>
                 <input type="email" th:field="*{email}" class="form-control" id="email" required/>
             </div>
+
             <div class="mb-3">
                 <label for="roles" class="form-label">Roles</label>
-                <select th:field="*{roles}" name="rolesSelected" class="form-select" id="roles" multiple size="3">
+                <select name="rolesSelected" multiple class="form-select" id="roles">
                     <option th:each="role : ${allRoles}"
                             th:value="${role.id}"
                             th:text="${role.name}"
@@ -53,8 +58,10 @@
 
             <div class="mb-3">
                 <label for="password" class="form-label">Password</label>
-                <input type="password" th:field="*{password}" class="form-control" id="password" placeholder="Leave blank if no change"/>
+                <input type="password" th:field="*{password}" class="form-control" id="password"
+                       placeholder="Leave blank if no change"/>
             </div>
+
             <button type="submit" class="btn btn-primary">Save</button>
             <a th:href="@{/admin}" class="btn btn-secondary">Cancel</a>
         </form>

@@ -52,13 +52,17 @@ public class Role implements GrantedAuthority {
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
+
         if (!(o instanceof Role)) return false;
-        Role role = (Role) o;
-        return Objects.equals(name, role.name);
+
+        Role other = (Role) o;
+
+        // Если оба объекта сохранены в БД (есть id)
+        return id != null && Objects.equals(id, other.id);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(name);
+        return id != null ? id.hashCode() : super.hashCode();
     }
 }
