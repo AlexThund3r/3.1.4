@@ -1,65 +1,40 @@
 package ru.kata.spring.boot_security.demo.controller;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 import ru.kata.spring.boot_security.demo.model.User;
-import ru.kata.spring.boot_security.demo.service.UserService;
-
-import java.util.List;
+import ru.kata.spring.boot_security.demo.service.UserService;  // Используем UserService вместо AdminService
 
 @RestController
-@RequestMapping("/api/users")
+@RequestMapping("/user")
 public class UserRestController {
 
-    private final UserService userService;
+    private final UserService userService;  // Внедряем UserService
 
-    @Autowired
     public UserRestController(UserService userService) {
-        this.userService = userService;
+        this.userService = userService;  // Инициализируем UserService
     }
 
-    // Получить всех пользователей
-    @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        return new ResponseEntity<>(userService.getAllUsers(), HttpStatus.OK);
+    // Перенаправление на страницу user/index.html
+    @GetMapping("")
+    public ResponseEntity<Void> redirectToUserPage() {
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Location", "/user/index.html");
+        return new ResponseEntity<>(headers, HttpStatus.FOUND);  // HTTP 302 редирект
     }
 
-    // Добавить нового пользователя
-    @PostMapping
-    public ResponseEntity<User> createUser(@RequestBody User user) {
-        // Проверка на существующего пользователя с таким email
-        if (userService.existsByEmail(user.getEmail())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST); // Возвращаем ошибку, если email уже существует
+    // Получение данных текущего пользователя
+    @GetMapping("/me")
+    public ResponseEntity<User> getCurrentUser() {
+        User user = userService.getCurrentUser();  // Используем UserService для получения текущего пользователя
+        if (user != null) {
+            return ResponseEntity.ok(user);  // Возвращаем данные текущего пользователя
+        } else {
+            return ResponseEntity.status(401).build();  // Если пользователь не найден, возвращаем 401 (Unauthorized)
         }
-
-        // Сохраняем нового пользователя
-        userService.saveUser(user);
-        return new ResponseEntity<>(user, HttpStatus.CREATED);
-    }
-
-    // Обновить пользователя
-    @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User user) {
-        User existingUser = userService.getUserById(id);
-        if (existingUser == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
-        // Обновляем данные пользователя
-        user.setId(id);
-        userService.updateUser(user);
-        return new ResponseEntity<>(user, HttpStatus.OK);
-    }
-
-    // Удалить пользователя
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
-        if (userService.getUserById(id) == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        userService.deleteUser(id);
-        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

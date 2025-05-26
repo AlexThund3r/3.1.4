@@ -1,6 +1,7 @@
 package ru.kata.spring.boot_security.demo.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -94,4 +95,18 @@ public class UserServiceImpl implements UserService {
     public boolean existsByEmail(String email) {
         return userRepository.existsByEmail(email);
     }
+    public User getCurrentUser() {
+        // Получаем аутентифицированного пользователя из контекста
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        if (principal instanceof UserDetails) {
+            UserDetails currentUserDetails = (UserDetails) principal;
+            // Ищем пользователя по email, который хранится в контексте безопасности
+            return userRepository.findByEmail(currentUserDetails.getUsername());
+        } else {
+            throw new RuntimeException("User is not authenticated"); // Если пользователь не аутентифицирован
+        }
+    }
+
+
 }

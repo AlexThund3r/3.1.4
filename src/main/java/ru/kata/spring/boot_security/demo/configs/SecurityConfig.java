@@ -1,6 +1,5 @@
 package ru.kata.spring.boot_security.demo.configs;
 
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -34,25 +33,23 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
-                .csrf().disable()
+                .csrf().disable()  // Для API отключение CSRF может быть целесообразным. Для форм можно включить.
                 .cors()
                 .and()
                 .authorizeRequests()
-                .antMatchers("/login", "/auth/**", "/css/**", "/js/**", "/images/**").permitAll()
-                .antMatchers("/api/admin/**").hasRole("ADMIN")
-                .antMatchers("/api/users/**").hasAnyRole("USER", "ADMIN")
-                .anyRequest().authenticated()
+                .antMatchers("/login", "/auth/**", "/css/**", "/js/**", "/images/**").permitAll()  // Разрешаем доступ к публичным ресурсам
+                .antMatchers("/admin/**").hasRole("ADMIN")  // Путь /admin для админов
+                .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")  // Путь /user для пользователей и админов
+                .anyRequest().authenticated()  // Все остальные пути требуют авторизации
                 .and()
                 .formLogin()
                 .loginPage("/login")
                 .usernameParameter("email")
                 .passwordParameter("password")
-                .successHandler(successUserHandler)
+                .successHandler(successUserHandler)  // Редирект после успешного логина
                 .permitAll()
                 .and()
                 .logout()
-                .permitAll()
-        ;
-
+                .permitAll();
     }
 }

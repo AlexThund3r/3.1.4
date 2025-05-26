@@ -9,7 +9,6 @@ import ru.kata.spring.boot_security.demo.model.Role;
 import ru.kata.spring.boot_security.demo.model.User;
 import ru.kata.spring.boot_security.demo.repository.RoleRepository;
 import ru.kata.spring.boot_security.demo.repository.UserRepository;
-
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -31,58 +30,16 @@ public class AdminServiceImpl implements AdminService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    // --- Для MVC ---
-
-    @Override
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @Override
-    public User getUserById(Long id) {
-        return userRepository.findById(id).orElse(null);
-    }
-
-    @Override
-    public void createUser(User user, List<Long> roleIds) {
-        Set<Role> roles = getRolesByIds(roleIds);
-        user.setRoles(roles);
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-    }
-
-    @Override
-    public void updateUser(User user, List<Long> roleIds) {
-        User existingUser = userRepository.findById(user.getId())
-                .orElseThrow(() -> new IllegalArgumentException("Пользователь не найден"));
-
-        existingUser.setFirstName(user.getFirstName());
-        existingUser.setLastName(user.getLastName());
-        existingUser.setEmail(user.getEmail());
-        existingUser.setAge(user.getAge());
-
-        if (user.getPassword() != null && !user.getPassword().isEmpty()) {
-            existingUser.setPassword(passwordEncoder.encode(user.getPassword()));
-        }
-
-        Set<Role> roles = getRolesByIds(roleIds);
-        existingUser.setRoles(roles);
-
-        userRepository.save(existingUser);
-    }
-
-    // --- Для REST ---
-
     @Override
     public User createUser(UserDTO dto) {
+        Set<Role> roles = getRolesByIds(dto.getRolesSelected());
+
         User user = new User();
         user.setFirstName(dto.getFirstName());
         user.setLastName(dto.getLastName());
         user.setEmail(dto.getEmail());
         user.setAge(dto.getAge());
         user.setPassword(passwordEncoder.encode(dto.getPassword()));
-
-        Set<Role> roles = getRolesByIds(dto.getRolesSelected());
         user.setRoles(roles);
 
         return userRepository.save(user);
@@ -109,6 +66,15 @@ public class AdminServiceImpl implements AdminService {
     }
 
     // --- Вспомогательные методы ---
+    @Override
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    public User getUserById(Long id) {
+        return userRepository.findById(id).orElse(null);
+    }
 
     @Override
     public void deleteUser(Long id) {
@@ -120,6 +86,11 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public User getCurrentUser() {
         return userRepository.findByEmail("admin@mail.ru");
+    }
+
+    @Override
+    public List<Role> getAllRoles() {
+        return roleRepository.findAll();
     }
 
     private Set<Role> getRolesByIds(List<Long> roleIds) {

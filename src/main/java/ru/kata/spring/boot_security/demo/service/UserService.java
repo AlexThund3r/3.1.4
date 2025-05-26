@@ -12,4 +12,5 @@ public interface UserService extends org.springframework.security.core.userdetai
     void deleteUser(Long id);
     User findByEmail(String email);
     boolean existsByEmail(String email);  // Новый метод для проверки существования email
+    User getCurrentUser();
 }

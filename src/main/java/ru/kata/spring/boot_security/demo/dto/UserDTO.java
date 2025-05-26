@@ -3,15 +3,18 @@ package ru.kata.spring.boot_security.demo.dto;
 import java.util.List;
 
 public class UserDTO {
+    private Long id;
     private String firstName;
     private String lastName;
     private int age;
     private String email;
     private String password;
     private List<Long> rolesSelected;
-    private Long id;
 
-    // Getters and Setters
+    // Getters and setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
     public String getFirstName() { return firstName; }
     public void setFirstName(String firstName) { this.firstName = firstName; }
 
@@ -29,7 +32,4 @@ public class UserDTO {
 
     public List<Long> getRolesSelected() { return rolesSelected; }
     public void setRolesSelected(List<Long> rolesSelected) { this.rolesSelected = rolesSelected; }
-
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
 }
